@@ -1,0 +1,16 @@
+[package]
+name = "audio-limiter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eframe = "0.18"
+cpal = "0.13"
+ringbuf = "0.2"
+atomic_float = "0.1"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+panic = "abort"

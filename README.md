@@ -36,7 +36,7 @@ First, change your playback device on your computer from your speakers / headpho
 
 ![Playback Devices](https://i.imgur.com/2Wqvc9H.png)
 
-Then, run `audio-limiter.exe`. It should look something like this:
+Then, run `audio-limiter.exe`. If you're on Windows you can download a [binary here](https://github.com/dylagit/audio-limiter/releases). If you're on another platform, follow the `Compiling From Source` instructions above. When you open the program, it should look something like this:
 
 ![Audio Limiter](https://i.imgur.com/hPTh2bw.png)
 

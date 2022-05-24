@@ -1,9 +1,9 @@
-use std::sync::atomic::Ordering;
 use atomic_float::AtomicF32;
 use cpal::Stream;
 use cpal::{traits::DeviceTrait, Device};
 use eframe::egui::{self, InnerResponse, Layout, Ui};
 use eframe::emath::Align;
+use std::sync::atomic::Ordering;
 
 use crate::streaming::{create_stream, get_devices};
 
@@ -23,15 +23,23 @@ struct AppData {
   output_stream: Option<Stream>,
 }
 
-fn get_device_name(devices: &Vec<Device>, idx: Option<usize>) -> String {
-  if let Some(idx) = idx {
-    devices[idx].name().unwrap_or("Unknown Device".to_string())
-  } else {
-    "No Device Selected".to_string()
-  }
+fn get_device_name(devices: &[Device], idx: Option<usize>) -> String {
+  idx.map_or_else(
+    || "No Device Selected".to_string(),
+    |idx| {
+      devices[idx]
+        .name()
+        .unwrap_or_else(|_| "Unknown Device".to_string())
+    },
+  )
 }
 
-fn create_combo_box(ui: &mut Ui, label: &'static str, devices: &Vec<Device>, device_idx: &mut Option<usize>) -> InnerResponse<Option<()>> {
+fn create_combo_box(
+  ui: &mut Ui,
+  label: &'static str,
+  devices: &[Device],
+  device_idx: &mut Option<usize>,
+) -> InnerResponse<Option<()>> {
   let device_name = get_device_name(devices, *device_idx);
 
   ui.label(label);
@@ -41,12 +49,12 @@ fn create_combo_box(ui: &mut Ui, label: &'static str, devices: &Vec<Device>, dev
     .selected_text(device_name)
     .show_ui(ui, |ui| {
       for (i, d) in devices.iter().enumerate() {
-        let device_name = d.name().unwrap_or("Unknown Device".to_string());
+        let device_name = d.name().unwrap_or_else(|_| "Unknown Device".to_string());
 
         ui.selectable_value(device_idx, Some(i), device_name);
       }
     });
-    
+
   ui.end_row();
 
   combo
@@ -88,8 +96,18 @@ impl AppData {
   }
 
   fn draw_interface(&mut self, ui: &mut Ui) {
-    create_combo_box(ui, "Input Device", &self.devices, &mut self.input_device_idx);
-    create_combo_box(ui, "Output Device", &self.devices, &mut self.output_device_idx);
+    create_combo_box(
+      ui,
+      "Input Device",
+      &self.devices,
+      &mut self.input_device_idx,
+    );
+    create_combo_box(
+      ui,
+      "Output Device",
+      &self.devices,
+      &mut self.output_device_idx,
+    );
 
     ui.label("Threshold");
     ui.add(egui::Slider::new(&mut self.threshold, -200.0..=0.0).max_decimals(0));
@@ -122,19 +140,23 @@ impl eframe::App for AppData {
 pub fn run() {
   let options = eframe::NativeOptions::default();
 
-  eframe::run_native("Audio Limiter", options, Box::new(|cc| {
-    cc.egui_ctx.set_pixels_per_point(2.0);
+  eframe::run_native(
+    "Audio Limiter",
+    options,
+    Box::new(|cc| {
+      cc.egui_ctx.set_pixels_per_point(2.0);
 
-    let app_data = AppData {
-      devices: get_devices(),
-      input_device_idx: None,
-      output_device_idx: None,
-      threshold: DEFAULT_THRESHOLD,
-      running: false,
-      input_stream: None,
-      output_stream: None,
-    };
+      let app_data = AppData {
+        devices: get_devices(),
+        input_device_idx: None,
+        output_device_idx: None,
+        threshold: DEFAULT_THRESHOLD,
+        running: false,
+        input_stream: None,
+        output_stream: None,
+      };
 
-    Box::new(app_data)
-  }));
+      Box::new(app_data)
+    }),
+  );
 }

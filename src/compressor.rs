@@ -8,7 +8,7 @@ pub struct Compressor {
   pub gain_rt: f32,
   pub gain_average: f32,
 
-  pub threshold: f32
+  pub threshold: f32,
 }
 
 fn calc_tau(sample_rate: f32, time_ms: f32) -> f32 {
@@ -24,7 +24,7 @@ fn limiter(input: f32, threshold: f32) -> f32 {
 fn ar_avg(avg: f32, at: f32, rt: f32, input: f32) -> f32 {
   let tau = if input > avg { at } else { rt };
 
-  (1.0 - tau) * avg + tau * input
+  (1.0 - tau).mul_add(avg, tau * input)
 }
 
 impl Compressor {

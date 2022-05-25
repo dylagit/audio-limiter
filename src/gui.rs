@@ -112,6 +112,9 @@ impl AppData {
     ui.label("Threshold");
     ui.add(egui::Slider::new(&mut self.threshold, -200.0..=0.0).max_decimals(0));
     ui.end_row();
+    if ui.button("🔄 Refresh devices").clicked() {
+      self.devices = get_devices();
+    }
   }
 }
 
